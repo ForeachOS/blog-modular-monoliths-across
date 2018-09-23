@@ -1,0 +1,9 @@
+server:
+  port: 8080
+  use-forward-headers: true
+
+spring:
+  h2:
+    console:
+      enabled: false
+
