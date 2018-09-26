@@ -5,11 +5,11 @@ import com.foreach.across.core.annotations.RefreshableCollection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -27,6 +27,7 @@ public class SupplierService
 	}
 
 	@EventListener
+	@Order(Ordered.HIGHEST_PRECEDENCE)
 	public void receive( SomeEvent event ) {
 		event.add( getClass().getSimpleName() );
 	}

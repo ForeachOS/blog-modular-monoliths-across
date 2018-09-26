@@ -1,6 +1,7 @@
 package it;
 
 import com.example.demo.DemoApplication;
+import com.example.demo.modules.three.SupplierService;
 import com.foreach.across.test.support.config.MockAcrossServletContextInitializer;
 import com.foreach.across.test.support.config.MockMvcConfiguration;
 import org.junit.Test;
@@ -13,13 +14,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration test that bootstraps the entire application but without a web container.
  * MockMVC is initialized and can be called to perform calls on the bootstrapped application.
  * <p>
- * Boostrapping is done with profile "integration-test" active, you can provide an
+ * Bootstrapping is done with profile "integration-test" active, you can provide an
  * <em>application-integration-test.yml</em> on the (test) classpath to specify application configuration options.
  * <p>
  * If specific application properties have been provided, only <em>application.yml</em> will apply.
@@ -35,9 +39,20 @@ public class ITDemoApplication
 	@Autowired
 	private MockMvc mockMvc;
 
+	@Autowired
+	private SupplierService supplierService;
+
 	@Test
 	public void bootstrappedOk() throws Exception {
 		// Test should really do something - but when it gets called, bootstrap has been successful
 		assertNotNull( mockMvc );
+	}
+
+	@Test
+	public void eventShouldBeHandledByAllModules() {
+		assertEquals(
+				Arrays.asList( "SupplierService", "InternalComponentOne", "InternalComponentTwo", "ApplicationComponent" ),
+				supplierService.getEventListeners()
+		);
 	}
 }

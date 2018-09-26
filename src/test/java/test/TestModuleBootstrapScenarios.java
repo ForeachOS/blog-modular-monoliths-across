@@ -1,5 +1,6 @@
 package test;
 
+import com.example.demo.modules.one.ExposedComponentOne;
 import com.example.demo.modules.one.ModuleOne;
 import com.example.demo.modules.three.ModuleThree;
 import com.example.demo.modules.three.SupplierService;
@@ -15,16 +16,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Slf4j
 public class TestModuleBootstrapScenarios
 {
 	@Test
 	public void moduleOneShouldBootstrapInIsolation() {
-		try (AcrossTestContext ignore = AcrossTestBuilders.standard( false ).modules( new ModuleOne() ).build()) {
-			LOG.trace( "Bootstrap successful." );
+		try (AcrossTestContext context = AcrossTestBuilders.standard( false )
+		                                                   .modules( new ModuleOne() )
+		                                                   .build()) {
+			assertNotNull( context.getBeanOfType( ExposedComponentOne.class ) );
 		}
 	}
 
@@ -53,16 +55,6 @@ public class TestModuleBootstrapScenarios
 		expectSuppliers( Arrays.asList( "ExposedComponentOne", "ExposedComponentTwo" ), new ModuleOne(), new ModuleTwo() );
 	}
 
-	@Test
-	public void eventIsHandledInModuleOrder() {
-		try (AcrossTestContext ctx = AcrossTestBuilders.standard( false )
-		                                               .modules( new ModuleThree(), new ModuleOne(), new ModuleTwo() )
-		                                               .build()) {
-			SupplierService supplierService = ctx.getBeanOfType( SupplierService.class );
-			assertEquals( Arrays.asList( "SupplierService", "InternalComponentOne", "InternalComponentTwo" ), supplierService.getEventListeners() );
-		}
-	}
-
 	private void expectSuppliers( Collection<String> names, AcrossModule... additionalModules ) {
 		try (AcrossTestContext ctx = AcrossTestBuilders.standard( false )
 		                                               .modules( new ModuleThree() )
@@ -70,6 +62,16 @@ public class TestModuleBootstrapScenarios
 		                                               .build()) {
 			SupplierService supplierService = ctx.getBeanOfType( SupplierService.class );
 			assertEquals( names, supplierService.getSupplierNames() );
+		}
+	}
+
+	@Test
+	public void eventIsHandledInModuleOrder() {
+		try (AcrossTestContext ctx = AcrossTestBuilders.standard( false )
+		                                               .modules( new ModuleTwo(), new ModuleThree(), new ModuleOne() )
+		                                               .build()) {
+			SupplierService supplierService = ctx.getBeanOfType( SupplierService.class );
+			assertEquals( Arrays.asList( "SupplierService", "InternalComponentOne", "InternalComponentTwo" ), supplierService.getEventListeners() );
 		}
 	}
 }
